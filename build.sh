@@ -10,7 +10,20 @@ function cmd_venv() {
     fi
 }
 
+function cmd_create-target() {
+    mkdir target
+}
 function cmd_run() {
+    if [ ! -d "target" ]; then
+        echo "Directory 'target' does not exist."
+        exit 1
+    fi
+
+    if [ -z "$(ls -A "target")" ]; then
+        echo "Directory 'target' is empty."
+        exit
+    fi
+
     params="$@"
     if [ -z "$params" ]; then
         params="main.py"
