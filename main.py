@@ -1,5 +1,5 @@
 import argparse
-import os
+import os, re
 import pdfplumber
 
 
@@ -8,19 +8,35 @@ def process_pdfs(directory):
     pdf_files = [f for f in os.listdir(directory) if f.lower().endswith('.pdf')]
     
     if not pdf_files:
-        print("Nenhum arquivo PDF encontrado no diretório.")
+        print("There's no pdf files in the target directory.")
         return
 
+    transactions = []
     for pdf_file in pdf_files:
         pdf_path = os.path.join(directory, pdf_file)
-        print(f"Abrindo: {pdf_path}")
-
+        
         # Abrir e processar o PDF
         with pdfplumber.open(pdf_path) as pdf:
             for i, page in enumerate(pdf.pages):
                 text = page.extract_text()
-                print(f"\n--- Página {i+1} de {pdf_file} ---\n")
-                print(text if text else "[Nenhum texto encontrado]")
+                pattern = r"\b\d{2}/\d{2}/\d{4}\b"
+                date = re.findall(pattern, text)[0]
+                for j in page.extract_text_lines():
+                    txline = j['text']
+                    if txline.startswith("BOVESPA"):
+                        terms = txline.split()
+                        dictt = {
+                            "date": date,
+                            "market": terms[0],
+                            "type": terms[1],
+                            "item": terms[3],
+                            "price": terms[-3],
+                            "total": terms[-2]
+                        }
+                        transactions.append(dictt)
+
+
+    return transactions
 
 
 if __name__ == "__main__":
@@ -29,6 +45,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if os.path.isdir(args.directory):
-        process_pdfs(args.directory)
+        print(process_pdfs(args.directory))
     else:
         print("Error: Not a valid dir path.")
