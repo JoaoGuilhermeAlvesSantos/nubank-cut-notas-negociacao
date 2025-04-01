@@ -21,7 +21,7 @@ function cmd_run() {
 
     if [ -z "$(ls -A "target")" ]; then
         echo "Directory 'target' is empty."
-        exit
+        exit 1
     fi
 
     params="$@"
@@ -29,7 +29,7 @@ function cmd_run() {
         params="main.py"
     fi
     source .venv/bin/activate
-    python $params
+    python $params 'target'
 }
 
 
