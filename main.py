@@ -3,6 +3,24 @@ import os, re
 import pdfplumber
 
 
+def aggregate(list_of_dicts):
+    items = set([d['item'] for d in list_of_dicts])
+    aggregated = []
+    for item in items:
+        total = 0
+        quantity = 0
+        for d in list_of_dicts:
+            if d['item'] == item:
+                total += d['total']
+                quantity += d['quantity']
+        aggregated.append({
+            "item": item,
+            "quantity": quantity,
+            "avgprice": f"{total/quantity:.2f}",
+            "total": f"{total:.2f}",
+        })
+    return aggregated
+
 def process_pdfs(directory):
     # Listar todos os arquivos PDF no diretório
     pdf_files = [f for f in os.listdir(directory) if f.lower().endswith('.pdf')]
@@ -44,6 +62,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if os.path.isdir(args.directory):
-        print(process_pdfs(args.directory))
+        listing = process_pdfs(args.directory)
+        aggregated = aggregate(listing)
+        for i in aggregated:
+            print(i['item'], i['total'])
     else:
         print("Error: Not a valid dir path.")
