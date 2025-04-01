@@ -30,12 +30,11 @@ def process_pdfs(directory):
                             "market": terms[0],
                             "type": terms[1],
                             "item": terms[3],
-                            "price": terms[-3],
-                            "total": terms[-2]
+                            "quantity": int(terms[-4]),
+                            "price": float(terms[-3].replace('.', '').replace(',', '.')),
+                            "total": float(terms[-2].replace('.', '').replace(',', '.'))
                         }
                         transactions.append(dictt)
-
-
     return transactions
 
 
